@@ -48,7 +48,7 @@
                         <i class="fa-solid fa-sliders text-purple-500"></i>
                         <span>Management Board</span>
                     </h2>
-                    <p class="text-sm text-gray-400 mt-1">Real-time CMS, Job Applicants, and Sales Dashboard</p>
+                    <p class="text-sm text-gray-400 mt-1">Real-time CMS, Job Applicants, Sales & Purchase Verification Dashboard</p>
                 </div>
                 <div class="mt-4 md:mt-0 flex space-x-3">
                     <button onclick="initializeDatabase()" id="initBtn" class="hidden text-xs bg-amber-600/20 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-lg hover:bg-amber-600/30 transition">
@@ -61,24 +61,60 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
                 <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
                     <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Sales Revenue</p>
                     <p class="text-2xl font-bold text-emerald-400 mt-1" id="analyticRevenue">$0.00</p>
-                    <p class="text-xs text-gray-500 mt-1" id="analyticSalesCount">0 individual purchases</p>
+                    <p class="text-xs text-gray-500 mt-1" id="analyticSalesCount">0 purchases</p>
                 </div>
                 <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Active Job Applications</p>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Verified Sales</p>
+                    <p class="text-2xl font-bold text-blue-400 mt-1" id="analyticVerified">0</p>
+                    <p class="text-xs text-gray-500 mt-1">Purchases delivered</p>
+                </div>
+                <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Job Applications</p>
                     <p class="text-2xl font-bold text-purple-400 mt-1" id="analyticApps">0</p>
-                    <p class="text-xs text-gray-500 mt-1">Awaiting management audit</p>
+                    <p class="text-xs text-gray-500 mt-1">Awaiting review</p>
                 </div>
                 <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Unique Database Visits</p>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Site Visits</p>
                     <p class="text-2xl font-bold text-blue-400 mt-1" id="analyticVisits">0</p>
-                    <p class="text-xs text-gray-500 mt-1">Increments dynamically on load</p>
+                    <p class="text-xs text-gray-500 mt-1">Unique database loads</p>
                 </div>
             </div>
 
+            <!-- PURCHASE VERIFICATION TRACKER (Owner Only) -->
+            <div id="purchaseTrackerSection" class="bg-gray-900 p-6 rounded-xl border border-gray-800 mb-8 hidden">
+                <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-receipt text-emerald-400"></i>
+                    <span>Purchase Verification Tracker</span>
+                </h3>
+                <div class="mb-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-sm text-emerald-300">
+                    <p><strong>Owner Only:</strong> Verify purchases, generate delivery tokens, and mark items as delivered to customers.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-gray-400 font-medium">
+                                <th class="p-3">Purchase ID</th>
+                                <th class="p-3">Item Purchased</th>
+                                <th class="p-3">Amount</th>
+                                <th class="p-3">Date</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchaseTrackerBody" class="divide-y divide-gray-800/50 text-gray-300">
+                            <tr>
+                                <td colspan="6" class="p-4 text-center text-gray-500">No purchases registered yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- JOB APPLICATION TRACKER -->
             <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 mb-8">
                 <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                     <i class="fa-solid fa-users-viewfinder text-purple-400"></i>
@@ -373,6 +409,37 @@
         </div>
     </div>
 
+    <!-- Purchase Verification Modal -->
+    <div id="purchaseModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white">Verify Purchase & Generate Token</h3>
+                <button onclick="closePurchaseModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Purchase ID</label>
+                    <input type="text" id="verifyPurchaseId" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-sm" readonly>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Item</label>
+                    <input type="text" id="verifyItemName" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-sm" readonly>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Amount</label>
+                    <input type="text" id="verifyAmount" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-sm" readonly>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Delivery Token (Auto-Generated)</label>
+                    <input type="text" id="deliveryToken" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-sm" readonly>
+                </div>
+                <button onclick="generateDeliveryToken()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+                    Generate Token & Mark Verified
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { getDatabase, ref, onValue, update, set, push, runTransaction, remove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
@@ -387,6 +454,8 @@
         let allCredentials = [];
         let allJobs = [];
         let allStoreItems = [];
+        let allSales = [];
+        let selectedPurchaseId = null;
 
         const REQUIRED_OWNER = { user: "My_AtlasX", pass: "washing0out", role: "Owner" };
         const PROD_USER = { user: "Prod_Staff", pass: "studio2026", role: "Production" };
@@ -401,10 +470,10 @@
         onValue(rootRef, (snapshot) => {
             const data = snapshot.val() || {};
             
-            // Handle credentials, jobs, store items
             allCredentials = data.credentials ? Object.values(data.credentials) : [REQUIRED_OWNER, PROD_USER];
             allJobs = data.jobs ? Object.values(data.jobs) : [];
             allStoreItems = data.storeItems ? Object.values(data.storeItems) : [];
+            allSales = data.sales ? Object.entries(data.sales).map(([id, sale]) => ({ ...sale, firebaseId: id })) : [];
 
             if (data.content) {
                 renderPublicContent(data.content);
@@ -415,23 +484,25 @@
             }
 
             // Update analytics
-            const salesRecordCount = data.sales ? Object.keys(data.sales).length : 0;
+            const salesRecordCount = allSales.length;
             let totalRevenueSum = 0;
-            if (data.sales) {
-                Object.values(data.sales).forEach(sale => {
-                    totalRevenueSum += parseFloat(sale.amountPaid || 0);
-                });
-            }
+            let verifiedCount = 0;
+            allSales.forEach(sale => {
+                totalRevenueSum += parseFloat(sale.amountPaid || 0);
+                if (sale.verified) verifiedCount++;
+            });
             const appRecordCount = data.applications ? Object.keys(data.applications).length : 0;
             const liveVisitsCount = (data.analytics && data.analytics.totalVisits) ? data.analytics.totalVisits : 1;
 
             document.getElementById('analyticRevenue').innerText = `$${totalRevenueSum.toFixed(2)}`;
-            document.getElementById('analyticSalesCount').innerText = `${salesRecordCount} verified asset checkouts`;
+            document.getElementById('analyticSalesCount').innerText = `${salesRecordCount} purchases`;
+            document.getElementById('analyticVerified').innerText = verifiedCount;
             document.getElementById('analyticApps').innerText = appRecordCount;
             document.getElementById('analyticVisits').innerText = liveVisitsCount;
 
             if (currentUser) {
                 renderApplicantTable(data.applications);
+                renderPurchaseTracker();
                 renderCredentialsList();
                 renderJobListingsList();
                 renderStoreItemsList();
@@ -530,7 +601,65 @@
             document.getElementById('editTeamList').value = content.teamList || '';
         }
 
-        // 4. CREDENTIALS MANAGEMENT
+        // 4. PURCHASE TRACKER RENDERING
+        function renderPurchaseTracker() {
+            const tbody = document.getElementById('purchaseTrackerBody');
+            tbody.innerHTML = '';
+
+            if (allSales.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">No purchases registered yet.</td></tr>`;
+                return;
+            }
+
+            allSales.forEach(sale => {
+                const statusColor = sale.verified ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+                const statusText = sale.verified ? 'Verified & Delivered' : 'Pending Verification';
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-900/50 transition">
+                        <td class="p-3 font-mono text-xs text-gray-400">${sale.saleId}</td>
+                        <td class="p-3 text-white">${sale.itemPurchased}</td>
+                        <td class="p-3 text-emerald-400 font-bold">$${parseFloat(sale.amountPaid).toFixed(2)}</td>
+                        <td class="p-3 text-gray-400 text-xs">${sale.timestamp}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] font-medium border ${statusColor}">${statusText}</span></td>
+                        <td class="p-3 text-right">
+                            ${!sale.verified ? `<button onclick="openVerifyModal('${sale.firebaseId}', '${sale.saleId}', '${sale.itemPurchased}', ${sale.amountPaid})" class="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded hover:bg-emerald-600/40 transition">Verify Purchase</button>` : '<span class="text-xs text-emerald-400">✓ Done</span>'}
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        window.openVerifyModal = function(firebaseId, saleId, itemName, amount) {
+            selectedPurchaseId = firebaseId;
+            document.getElementById('verifyPurchaseId').value = saleId;
+            document.getElementById('verifyItemName').value = itemName;
+            document.getElementById('verifyAmount').value = `$${parseFloat(amount).toFixed(2)}`;
+            document.getElementById('deliveryToken').value = '';
+            document.getElementById('purchaseModal').classList.replace('hidden', 'flex');
+        }
+
+        window.closePurchaseModal = function() {
+            document.getElementById('purchaseModal').classList.replace('flex', 'hidden');
+            selectedPurchaseId = null;
+        }
+
+        window.generateDeliveryToken = function() {
+            if (!selectedPurchaseId) return;
+            const token = 'DELIVERY-' + Math.random().toString(36).substring(2, 15).toUpperCase() + '-' + Date.now();
+            document.getElementById('deliveryToken').value = token;
+
+            const saleRef = ref(db, `iris_interactives/sales/${selectedPurchaseId}`);
+            update(saleRef, {
+                verified: true,
+                deliveryToken: token,
+                verifiedAt: new Date().toLocaleString()
+            }).then(() => {
+                alert('Purchase verified! Token generated and sent to customer.');
+                closePurchaseModal();
+            }).catch(err => alert("Error: " + err.message));
+        }
+
+        // 5. CREDENTIALS MANAGEMENT
         function renderCredentialsList() {
             const list = document.getElementById('credentialsList');
             list.innerHTML = '';
@@ -582,7 +711,7 @@
             }
         }
 
-        // 5. JOB LISTINGS MANAGEMENT
+        // 6. JOB LISTINGS MANAGEMENT
         function renderJobListingsList() {
             const list = document.getElementById('jobListingsList');
             list.innerHTML = '';
@@ -640,7 +769,7 @@
             }
         }
 
-        // 6. STORE ITEMS MANAGEMENT
+        // 7. STORE ITEMS MANAGEMENT
         function renderStoreItemsList() {
             const list = document.getElementById('storeItemsList');
             list.innerHTML = '';
@@ -704,7 +833,7 @@
             }
         }
 
-        // 7. JOB APPLICATION SUBMISSION
+        // 8. JOB APPLICATION SUBMISSION
         window.submitJobApplication = function() {
             const name = document.getElementById('appFormName').value.trim();
             const email = document.getElementById('appFormEmail').value.trim();
@@ -739,7 +868,7 @@
             }).catch(err => alert("Error writing application to database: " + err.message));
         }
 
-        // 8. PURCHASE SIMULATION
+        // 9. PURCHASE SIMULATION
         window.triggerSimulatedPurchase = function(itemId, itemName, price, file) {
             const salesGroupRef = ref(db, 'iris_interactives/sales');
             const newSaleRef = push(salesGroupRef);
@@ -749,13 +878,15 @@
                 itemPurchased: itemName,
                 amountPaid: price,
                 itemId: itemId,
+                file: file,
+                verified: false,
                 timestamp: new Date().toLocaleString()
             }).then(() => {
-                alert(`Transaction logged! Asset: ${file}\nLive Revenue calculations updated across backend database.`);
+                alert(`Transaction logged! Asset: ${file}\nYour purchase will appear in the admin dashboard for verification.`);
             }).catch(err => alert("Sales database logging failed: " + err.message));
         }
 
-        // 9. APPLICATION TRACKER RENDERING
+        // 10. APPLICATION TRACKER RENDERING
         function renderApplicantTable(applications) {
             const tbody = document.getElementById('trackerTableBody');
             tbody.innerHTML = '';
@@ -765,7 +896,7 @@
                 return;
             }
 
-            Object.values(applications).forEach(app => {
+            Object.entries(applications).forEach(([firebaseId, app]) => {
                 const badgeColor = app.status === 'Accepted' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 
                                    app.status === 'Rejected' ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
                 
@@ -777,9 +908,9 @@
                         <td class="p-3 text-gray-400 text-xs max-w-xs truncate" title="${app.portfolioNotes}">${app.portfolioNotes}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] font-medium border ${badgeColor}">${app.status}</span></td>
                         <td class="p-3 text-right space-x-1 whitespace-nowrap">
-                            <button onclick="updateAppStatus('${app.id}', 'Accepted')" class="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded hover:bg-emerald-600/40 transition">Accept</button>
-                            <button onclick="updateAppStatus('${app.id}', 'Rejected')" class="text-xs bg-red-600/20 text-red-400 border border-red-500/30 px-2 py-1 rounded hover:bg-red-600/40 transition">Reject</button>
-                            <button onclick="deleteAppRecord('${app.id}')" class="text-xs text-gray-500 hover:text-white px-1 transition" title="Delete Permanent Log"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="updateAppStatus('${firebaseId}', 'Accepted')" class="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded hover:bg-emerald-600/40 transition">Accept</button>
+                            <button onclick="updateAppStatus('${firebaseId}', 'Rejected')" class="text-xs bg-red-600/20 text-red-400 border border-red-500/30 px-2 py-1 rounded hover:bg-red-600/40 transition">Reject</button>
+                            <button onclick="deleteAppRecord('${firebaseId}')" class="text-xs text-gray-500 hover:text-white px-1 transition" title="Delete Permanent Log"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
@@ -799,7 +930,7 @@
             }
         }
 
-        // 10. LOGIN SECURITY CONTROL LOGIC
+        // 11. LOGIN SECURITY CONTROL LOGIC
         window.attemptLogin = function() {
             const userIn = document.getElementById('loginUser').value;
             const passIn = document.getElementById('loginPass').value;
@@ -828,11 +959,12 @@
             badgeText.innerText = `${currentUser.user} (${currentUser.role})`;
             document.getElementById('dashboardSection').classList.remove('hidden');
 
-            // Show credentials section only for Owner
             if (currentUser.role === 'Owner') {
                 document.getElementById('credentialsSection').classList.remove('hidden');
+                document.getElementById('purchaseTrackerSection').classList.remove('hidden');
             } else {
                 document.getElementById('credentialsSection').classList.add('hidden');
+                document.getElementById('purchaseTrackerSection').classList.add('hidden');
             }
 
             renderJobListingsList();
