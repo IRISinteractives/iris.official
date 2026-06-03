@@ -6,377 +6,349 @@
     <title>IRIS Interactives | Professional Development Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #7c3aed;
+            --accent-light: #a78bfa;
+            --accent-glow: rgba(124, 58, 237, 0.15);
+        }
+        body { font-family: 'Syne', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-    <nav class="bg-gray-950 border-b border-gray-800 sticky top-0 z-50">
+        .nav-link {
+            position: relative;
+            padding-bottom: 2px;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1.5px;
+            background: var(--accent-light);
+            transition: width 0.25s ease;
+        }
+        .nav-link.active { color: #a78bfa; }
+        .nav-link.active::after,
+        .nav-link:hover::after { width: 100%; }
+
+        .card-hover {
+            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-hover:hover {
+            border-color: rgba(124, 58, 237, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(124, 58, 237, 0.08);
+        }
+
+        .glow-text { text-shadow: 0 0 40px rgba(124, 58, 237, 0.4); }
+
+        .badge-pending { background: rgba(245,158,11,0.1); color: #fbbf24; border-color: rgba(245,158,11,0.3); }
+        .badge-accepted { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(16,185,129,0.3); }
+        .badge-rejected { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.3); }
+
+        .section-enter { animation: fadeUp 0.3s ease forwards; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse-dot {
+            width: 8px; height: 8px;
+            background: #34d399;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52,211,153,0.4); }
+            50%       { opacity: 0.8; box-shadow: 0 0 0 6px rgba(52,211,153,0); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+
+    <!-- NAV -->
+    <nav class="bg-gray-950/90 border-b border-gray-800/60 sticky top-0 z-50 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-3" onclick="switchTab('home')" class="cursor-pointer">
-                    <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center font-bold text-xl text-white tracking-wider shadow-lg shadow-purple-500/20">
+
+                <button onclick="switchTab('home')" class="flex items-center space-x-3 group">
+                    <div class="w-9 h-9 bg-violet-600 rounded-lg flex items-center justify-center font-bold text-xs text-white shadow-lg shadow-violet-600/30 group-hover:shadow-violet-600/50 transition-shadow">
                         IRIS
                     </div>
-                    <span class="text-xl font-bold tracking-tight text-white cursor-pointer">Interactives</span>
+                    <span class="text-lg font-extrabold tracking-tight text-white">Interactives</span>
+                </button>
+
+                <div class="hidden md:flex items-center space-x-8 text-sm font-semibold">
+                    <button onclick="switchTab('home')" class="nav-link active text-gray-300 hover:text-white transition-colors">Home</button>
+                    <button onclick="switchTab('about')" class="nav-link text-gray-400 hover:text-white transition-colors">About</button>
+                    <button onclick="switchTab('team')" class="nav-link text-gray-400 hover:text-white transition-colors">Team</button>
+                    <button onclick="switchTab('careers')" class="nav-link text-gray-400 hover:text-white transition-colors">Careers</button>
                 </div>
-                <div class="hidden md:flex space-x-8 text-sm font-medium">
-                    <button onclick="switchTab('home')" class="nav-link text-purple-400 hover:text-white transition">Home</button>
-                    <button onclick="switchTab('about')" class="nav-link text-gray-400 hover:text-white transition">About</button>
-                    <button onclick="switchTab('team')" class="nav-link text-gray-400 hover:text-white transition">Team</button>
-                    <button onclick="switchTab('store')" class="nav-link text-gray-400 hover:text-white transition">Store</button>
-                    <button onclick="switchTab('careers')" class="nav-link text-gray-400 hover:text-white transition">Careers</button>
-                </div>
+
                 <div>
-                    <button id="loginNavBtn" onclick="openLoginModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2">
-                        <i class="fa-solid fa-right-to-bracket"></i>
-                        <span>Management Login</span>
+                    <button id="loginNavBtn" onclick="openLoginModal()" class="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:shadow-lg hover:shadow-violet-600/20 flex items-center space-x-2">
+                        <i class="fa-solid fa-right-to-bracket text-xs"></i>
+                        <span>Management</span>
                     </button>
-                    <div id="userBadge" class="hidden flex items-center space-x-4">
-                        <span id="badgeText" class="text-xs bg-purple-900/50 text-purple-300 border border-purple-700 px-3 py-1 rounded-full font-mono"></span>
-                        <button onclick="logout()" class="text-gray-400 hover:text-red-400 text-sm font-medium transition">Logout</button>
+                    <div id="userBadge" class="hidden items-center space-x-3">
+                        <span id="badgeText" class="font-mono text-xs bg-violet-950/60 text-violet-300 border border-violet-700/50 px-3 py-1.5 rounded-lg"></span>
+                        <button onclick="logout()" class="text-gray-500 hover:text-red-400 text-xs font-semibold transition-colors">Logout</button>
                     </div>
                 </div>
+
             </div>
         </div>
     </nav>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        
-        <section id="dashboardSection" class="hidden mb-12 p-6 bg-gray-950 border border-purple-900/40 rounded-2xl shadow-xl">
-            <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-800 pb-4 mb-6">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        <!-- DASHBOARD -->
+        <section id="dashboardSection" class="hidden mb-10 bg-gray-950 border border-gray-800/60 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="flex flex-col md:flex-row md:items-center justify-between px-6 py-5 border-b border-gray-800/60 bg-gradient-to-r from-violet-950/30 to-transparent">
                 <div>
-                    <h2 class="text-2xl font-bold text-white flex items-center space-x-2">
-                        <i class="fa-solid fa-sliders text-purple-500"></i>
-                        <span>Management Board</span>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-violet-400 text-base"></i>
+                        Management Board
                     </h2>
-                    <p class="text-sm text-gray-400 mt-1">Real-time CMS, Job Applicants, Sales & Purchase Verification Dashboard</p>
+                    <p class="text-xs text-gray-500 mt-0.5 font-mono">CMS · Applicant Tracker · Analytics</p>
                 </div>
-                <div class="mt-4 md:mt-0 flex space-x-3">
-                    <button onclick="initializeDatabase()" id="initBtn" class="hidden text-xs bg-amber-600/20 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-lg hover:bg-amber-600/30 transition">
-                        Initialize Demo Data
+                <div class="mt-3 md:mt-0 flex items-center gap-3">
+                    <button onclick="initializeDatabase()" id="initBtn" class="hidden text-xs bg-amber-600/10 text-amber-400 border border-amber-500/20 px-3 py-1.5 rounded-lg hover:bg-amber-600/20 transition font-semibold">
+                        Seed Demo Data
                     </button>
-                    <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-green-400/10 text-green-400 border border-green-500/20">
-                        <span class="w-2 h-2 mr-2 bg-green-400 rounded-full animate-ping"></span>
-                        Firebase Connected
-                    </span>
+                    <div class="flex items-center gap-2 text-xs font-semibold text-emerald-400 bg-emerald-400/5 border border-emerald-500/20 px-3 py-1.5 rounded-lg">
+                        <div class="pulse-dot"></div>
+                        Firebase Live
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Sales Revenue</p>
-                    <p class="text-2xl font-bold text-emerald-400 mt-1" id="analyticRevenue">$0.00</p>
-                    <p class="text-xs text-gray-500 mt-1" id="analyticSalesCount">0 purchases</p>
+            <!-- Analytics Strip -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 border-b border-gray-800/60">
+                <div class="p-5 border-r border-gray-800/60">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Job Applications</p>
+                    <p class="text-3xl font-extrabold text-violet-400 mt-1" id="analyticApps">0</p>
+                    <p class="text-[11px] text-gray-600 mt-0.5">awaiting review</p>
                 </div>
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Verified Sales</p>
-                    <p class="text-2xl font-bold text-blue-400 mt-1" id="analyticVerified">0</p>
-                    <p class="text-xs text-gray-500 mt-1">Purchases delivered</p>
+                <div class="p-5 border-r border-gray-800/60 sm:border-r">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Site Visits</p>
+                    <p class="text-3xl font-extrabold text-blue-400 mt-1" id="analyticVisits">0</p>
+                    <p class="text-[11px] text-gray-600 mt-0.5">unique db loads</p>
                 </div>
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Job Applications</p>
-                    <p class="text-2xl font-bold text-purple-400 mt-1" id="analyticApps">0</p>
-                    <p class="text-xs text-gray-500 mt-1">Awaiting review</p>
-                </div>
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Site Visits</p>
-                    <p class="text-2xl font-bold text-blue-400 mt-1" id="analyticVisits">0</p>
-                    <p class="text-xs text-gray-500 mt-1">Unique database loads</p>
+                <div class="p-5 col-span-2 sm:col-span-1">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Active Listings</p>
+                    <p class="text-3xl font-extrabold text-purple-400 mt-1" id="analyticJobs">0</p>
+                    <p class="text-[11px] text-gray-600 mt-0.5">open positions</p>
                 </div>
             </div>
 
-            <!-- PURCHASE VERIFICATION TRACKER (Owner Only) -->
-            <div id="purchaseTrackerSection" class="bg-gray-900 p-6 rounded-xl border border-gray-800 mb-8 hidden">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-                    <i class="fa-solid fa-receipt text-emerald-400"></i>
-                    <span>Purchase Verification Tracker</span>
-                </h3>
-                <div class="mb-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-sm text-emerald-300">
-                    <p><strong>Owner Only:</strong> Verify purchases, generate delivery tokens, and mark items as delivered to customers.</p>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="border-b border-gray-800 text-gray-400 font-medium">
-                                <th class="p-3">Purchase ID</th>
-                                <th class="p-3">Item Purchased</th>
-                                <th class="p-3">Amount</th>
-                                <th class="p-3">Date</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="purchaseTrackerBody" class="divide-y divide-gray-800/50 text-gray-300">
-                            <tr>
-                                <td colspan="6" class="p-4 text-center text-gray-500">No purchases registered yet.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <div class="p-6 space-y-8">
 
-            <!-- JOB APPLICATION TRACKER -->
-            <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 mb-8">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-                    <i class="fa-solid fa-users-viewfinder text-purple-400"></i>
-                    <span>Built-In Job Application Tracker</span>
-                </h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="border-b border-gray-800 text-gray-400 font-medium">
-                                <th class="p-3">Applicant Name</th>
-                                <th class="p-3">Position Applied</th>
-                                <th class="p-3">Contact Email</th>
-                                <th class="p-3">Portfolio/Notes</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 text-right">Actions (Owners Only)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="trackerTableBody" class="divide-y divide-gray-800/50 text-gray-300">
-                            <tr>
-                                <td colspan="6" class="p-4 text-center text-gray-500">No applications registered in database yet.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- JOB APPLICATION TRACKER -->
+                <div>
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-users-viewfinder text-violet-400"></i>
+                        Job Application Tracker
+                    </h3>
+                    <div class="overflow-x-auto rounded-xl border border-gray-800/60">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="bg-gray-900/60 text-[11px] text-gray-500 uppercase tracking-wider font-bold border-b border-gray-800/60">
+                                    <th class="px-4 py-3">Applicant</th>
+                                    <th class="px-4 py-3">Position</th>
+                                    <th class="px-4 py-3">Email</th>
+                                    <th class="px-4 py-3">Portfolio</th>
+                                    <th class="px-4 py-3">Status</th>
+                                    <th class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trackerTableBody" class="divide-y divide-gray-800/40 text-gray-300">
+                                <tr><td colspan="6" class="px-4 py-6 text-center text-gray-600 font-mono text-xs">No applications on record.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
-            <!-- CREDENTIALS MANAGEMENT (Owner Only) -->
-            <div id="credentialsSection" class="bg-gray-900 p-6 rounded-xl border border-gray-800 mb-8 hidden">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-                    <i class="fa-solid fa-key text-amber-400"></i>
-                    <span>Manage System Credentials</span>
-                </h3>
-                <div class="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-300">
-                    <p><strong>Owner Only Feature:</strong> Create or revoke user credentials for Production staff and other team members.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="space-y-4 border-l-2 border-amber-500 pl-4">
-                        <h4 class="text-sm font-bold text-amber-400 uppercase tracking-wider">Create New User Credentials</h4>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Username</label>
-                            <input type="text" id="newCredUsername" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-amber-500" placeholder="username_here">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Security Key (Password)</label>
-                            <input type="password" id="newCredPassword" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-amber-500" placeholder="secure_key">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Role</label>
-                            <select id="newCredRole" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-amber-500">
+                <!-- CREDENTIALS MANAGEMENT (Owner Only) -->
+                <div id="credentialsSection" class="hidden">
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-key text-amber-400"></i>
+                        Manage System Credentials
+                        <span class="text-[10px] font-mono bg-amber-400/10 text-amber-400 border border-amber-400/20 px-2 py-0.5 rounded">Owner Only</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gray-900/50 border border-gray-800/60 rounded-xl p-5 space-y-3">
+                            <h4 class="text-xs font-bold text-amber-400 uppercase tracking-widest">Create Credential</h4>
+                            <input type="text" id="newCredUsername" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-amber-500 transition" placeholder="Username">
+                            <input type="password" id="newCredPassword" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-amber-500 transition" placeholder="Security key">
+                            <select id="newCredRole" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-amber-500 transition">
                                 <option value="Production">Production</option>
                                 <option value="Owner">Owner</option>
                             </select>
+                            <button onclick="addNewCredential()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition">
+                                <i class="fa-solid fa-plus mr-1.5"></i> Add Credential
+                            </button>
                         </div>
-                        <button onclick="addNewCredential()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition">
-                            <i class="fa-solid fa-plus mr-2"></i> Add Credential
+                        <div class="bg-gray-900/50 border border-gray-800/60 rounded-xl p-5">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Active Credentials</h4>
+                            <div id="credentialsList" class="space-y-2 max-h-56 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JOB LISTINGS MANAGEMENT -->
+                <div id="jobListingsSection">
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-briefcase text-violet-400"></i>
+                        Manage Job Listings
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gray-900/50 border border-gray-800/60 rounded-xl p-5 space-y-3">
+                            <h4 class="text-xs font-bold text-violet-400 uppercase tracking-widest">New Listing</h4>
+                            <input type="text" id="newJobTitle" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition" placeholder="Job title">
+                            <textarea id="newJobDesc" rows="3" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition resize-none" placeholder="Job description"></textarea>
+                            <input type="text" id="newJobPay" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition" placeholder="Compensation (e.g. $50/hr)">
+                            <button onclick="addNewJob()" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition">
+                                <i class="fa-solid fa-plus mr-1.5"></i> Add Listing
+                            </button>
+                        </div>
+                        <div class="bg-gray-900/50 border border-gray-800/60 rounded-xl p-5">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Current Listings</h4>
+                            <div id="jobListingsList" class="space-y-2 max-h-56 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CMS CONTROLS -->
+                <div id="ownerCmsGroup" class="hidden">
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-gray-400"></i>
+                        Site Content
+                        <span class="text-[10px] font-mono bg-violet-400/10 text-violet-400 border border-violet-400/20 px-2 py-0.5 rounded">Owner Only</span>
+                    </h3>
+                    <div class="bg-gray-900/50 border border-gray-800/60 rounded-xl p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Homepage Headline</label>
+                                <input type="text" id="editHomeHeadline" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Homepage Subtext</label>
+                                <textarea id="editHomeSubtext" rows="2" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition resize-none"></textarea>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">About Bio</label>
+                                <textarea id="editAboutBio" rows="2" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition resize-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Team Roster (Comma Separated)</label>
+                                <input type="text" id="editTeamList" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button onclick="saveCmsData()" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-6 py-2 rounded-lg text-sm transition hover:shadow-lg hover:shadow-violet-600/20">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save Changes Live
                         </button>
                     </div>
-
-                    <div class="space-y-4 border-l-2 border-red-500 pl-4">
-                        <h4 class="text-sm font-bold text-red-400 uppercase tracking-wider">Active Credentials</h4>
-                        <div id="credentialsList" class="space-y-2 max-h-64 overflow-y-auto">
-                            <!-- Credentials will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- JOB LISTINGS MANAGEMENT -->
-            <div id="jobListingsSection" class="bg-gray-900 p-6 rounded-xl border border-gray-800 mb-8">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-                    <i class="fa-solid fa-briefcase text-purple-400"></i>
-                    <span>Manage Job Listings</span>
-                </h3>
-                <div class="mb-6 p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg text-sm text-purple-300">
-                    <p><strong>Owner & Production:</strong> Create, edit, and delete job listings. Items appear on the public Careers page.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-4 border-l-2 border-purple-500 pl-4">
-                        <h4 class="text-sm font-bold text-purple-400 uppercase tracking-wider">Add New Job Listing</h4>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Job Title</label>
-                            <input type="text" id="newJobTitle" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Job Description</label>
-                            <textarea id="newJobDesc" rows="3" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Compensation Structure</label>
-                            <input type="text" id="newJobPay" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500" placeholder="$50/hr or Robux split">
-                        </div>
-                        <button onclick="addNewJob()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition">
-                            <i class="fa-solid fa-plus mr-2"></i> Add Job Listing
-                        </button>
-                    </div>
-
-                    <div class="space-y-4 border-l-2 border-blue-500 pl-4">
-                        <h4 class="text-sm font-bold text-blue-400 uppercase tracking-wider">Current Listings</h4>
-                        <div id="jobListingsList" class="space-y-3 max-h-64 overflow-y-auto">
-                            <!-- Job listings will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STORE ITEMS MANAGEMENT -->
-            <div id="storeItemsSection" class="bg-gray-900 p-6 rounded-xl border border-gray-800 mb-8">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-                    <i class="fa-solid fa-store text-green-400"></i>
-                    <span>Manage Store Inventory</span>
-                </h3>
-                <div class="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-green-300">
-                    <p><strong>Owner & Production:</strong> Add, edit, and delete store items. Items appear on the public Store page.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-4 border-l-2 border-green-500 pl-4">
-                        <h4 class="text-sm font-bold text-green-400 uppercase tracking-wider">Add New Store Item</h4>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Asset Name</label>
-                            <input type="text" id="newStoreItem" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Asset Description</label>
-                            <textarea id="newStoreDesc" rows="2" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Price (USD)</label>
-                            <input type="number" step="0.01" id="newStorePrice" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500" placeholder="0.00">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Showcase Link (Image, YouTube, Roblox URL)</label>
-                            <input type="text" id="newStoreShowcase" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500" placeholder="https://...">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Deliverable File Name</label>
-                            <input type="text" id="newStoreFile" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500" placeholder="asset.rbxl">
-                        </div>
-                        <button onclick="addNewStoreItem()" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition">
-                            <i class="fa-solid fa-plus mr-2"></i> Add Store Item
-                        </button>
-                    </div>
-
-                    <div class="space-y-4 border-l-2 border-cyan-500 pl-4">
-                        <h4 class="text-sm font-bold text-cyan-400 uppercase tracking-wider">Current Items</h4>
-                        <div id="storeItemsList" class="space-y-3 max-h-64 overflow-y-auto">
-                            <!-- Store items will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="cmsControls" class="bg-gray-900 p-6 rounded-xl border border-gray-800">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-                    <i class="fa-solid fa-pen-to-square text-gray-400"></i>
-                    <span>Manage Public Site Content</span>
-                </h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div id="ownerCmsGroup" class="space-y-4">
-                        <div class="border-l-2 border-purple-500 pl-3"><h4 class="text-sm font-bold text-purple-400 uppercase tracking-wider">Owner Content Controls</h4></div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Homepage Headline</label>
-                            <input type="text" id="editHomeHeadline" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Homepage Subtext</label>
-                            <textarea id="editHomeSubtext" rows="2" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">About Us Bio</label>
-                            <textarea id="editAboutBio" rows="2" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Team Roster (Comma Separated Names)</label>
-                            <input type="text" id="editTeamList" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500">
-                        </div>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="border-l-2 border-blue-500 pl-3"><h4 class="text-sm font-bold text-blue-400 uppercase tracking-wider">General Content</h4></div>
-                    </div>
                 </div>
 
-                <div class="mt-6 pt-4 border-t border-gray-800 flex justify-end">
-                    <button onclick="saveCmsData()" class="bg-purple-600 hover:bg-purple-700 text-white font-medium px-6 py-2 rounded-lg text-sm shadow transition">
-                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save Changes Live
-                    </button>
-                </div>
             </div>
         </section>
 
-        <section id="homePage" class="content-tab space-y-12 py-6">
+        <!-- HOME -->
+        <section id="homePage" class="content-tab section-enter space-y-16 py-8">
             <div class="text-center max-w-3xl mx-auto space-y-6">
-                <span class="text-xs font-bold tracking-widest text-purple-500 uppercase bg-purple-500/10 px-4 py-1.5 rounded-full border border-purple-500/20">Elite Metaverse Production Engine</span>
-                <h1 id="viewHomeHeadline" class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight">Syncing Engine...</h1>
-                <p id="viewHomeSubtext" class="text-lg text-gray-400 leading-relaxed"></p>
+                <span class="inline-block text-[11px] font-bold tracking-widest text-violet-400 uppercase bg-violet-500/8 px-4 py-1.5 rounded-full border border-violet-500/20">Elite Metaverse Production Engine</span>
+                <h1 id="viewHomeHeadline" class="text-5xl sm:text-7xl font-extrabold text-white tracking-tighter leading-none glow-text">Syncing...</h1>
+                <p id="viewHomeSubtext" class="text-base text-gray-400 leading-relaxed max-w-2xl mx-auto"></p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8">
-                <div class="bg-gray-950 border border-gray-800 p-6 rounded-xl"><div class="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-cubes"></i></div><h3 class="text-lg font-bold text-white">Roblox Development</h3><p class="text-sm text-gray-400 mt-2">LuaU architectural modules and frameworks built for performance scale.</p></div>
-                <div class="bg-gray-950 border border-gray-800 p-6 rounded-xl"><div class="w-12 h-12 bg-green-500/10 text-green-500 rounded-xl flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-cube"></i></div><h3 class="text-lg font-bold text-white">Minecraft Networks</h3><p class="text-sm text-gray-400 mt-2">Custom Spigot/Velocity plugins engineered in native enterprise Java.</p></div>
-                <div class="bg-gray-950 border border-gray-800 p-6 rounded-xl"><div class="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-code"></i></div><h3 class="text-lg font-bold text-white">Web Architecture</h3><p class="text-sm text-gray-400 mt-2">NextJS web setups linking direct API state mechanics back onto gaming services.</p></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-gray-950 border border-gray-800/60 p-6 rounded-2xl card-hover">
+                    <div class="w-11 h-11 bg-red-500/10 text-red-400 rounded-xl flex items-center justify-center text-lg mb-5"><i class="fa-solid fa-cubes"></i></div>
+                    <h3 class="text-base font-bold text-white mb-2">Roblox Development</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">LuaU architectural modules and frameworks built for performance at scale.</p>
+                </div>
+                <div class="bg-gray-950 border border-gray-800/60 p-6 rounded-2xl card-hover">
+                    <div class="w-11 h-11 bg-green-500/10 text-green-400 rounded-xl flex items-center justify-center text-lg mb-5"><i class="fa-solid fa-cube"></i></div>
+                    <h3 class="text-base font-bold text-white mb-2">Minecraft Networks</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Custom Spigot/Velocity plugins engineered in native enterprise Java.</p>
+                </div>
+                <div class="bg-gray-950 border border-gray-800/60 p-6 rounded-2xl card-hover">
+                    <div class="w-11 h-11 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center text-lg mb-5"><i class="fa-solid fa-code"></i></div>
+                    <h3 class="text-base font-bold text-white mb-2">Web Architecture</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Next.js web setups linking direct API state mechanics back onto gaming services.</p>
+                </div>
             </div>
         </section>
 
-        <section id="aboutPage" class="content-tab hidden max-w-4xl mx-auto space-y-6">
-            <h2 class="text-3xl font-bold text-white border-b border-gray-800 pb-3">About IRIS Interactives</h2>
-            <p id="viewAboutBio" class="text-gray-300 text-lg bg-gray-950 p-6 rounded-xl border border-gray-800 leading-relaxed"></p>
-        </section>
-
-        <section id="teamPage" class="content-tab hidden space-y-6">
-            <h2 class="text-3xl font-bold text-white">Our Engineering Roster</h2>
-            <div id="viewTeamGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-6"></div>
-        </section>
-
-        <section id="storePage" class="content-tab hidden space-y-6">
+        <!-- ABOUT -->
+        <section id="aboutPage" class="content-tab hidden section-enter max-w-3xl mx-auto space-y-6 py-8">
             <div>
-                <h2 class="text-3xl font-bold text-white">Digital Marketplace</h2>
-                <p class="text-gray-400 text-sm mt-1">Licensable high-end assets and scripts. Purchasing automatically saves records to the data pool.</p>
+                <span class="text-[11px] font-bold tracking-widest text-violet-400 uppercase">About Us</span>
+                <h2 class="text-4xl font-extrabold text-white tracking-tight mt-1">IRIS Interactives</h2>
             </div>
-            <div id="storeItemsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Store items will be rendered here -->
-            </div>
+            <p id="viewAboutBio" class="text-gray-400 text-base bg-gray-950 p-6 rounded-2xl border border-gray-800/60 leading-relaxed"></p>
         </section>
 
-        <section id="careersPage" class="content-tab hidden space-y-8">
+        <!-- TEAM -->
+        <section id="teamPage" class="content-tab hidden section-enter space-y-6 py-8">
             <div>
-                <h2 class="text-3xl font-bold text-white">Active Career Listings</h2>
-                <p class="text-gray-400 text-sm mt-1">Join our elite engineering team and shape the future of gaming infrastructure.</p>
+                <span class="text-[11px] font-bold tracking-widest text-violet-400 uppercase">The People</span>
+                <h2 class="text-4xl font-extrabold text-white tracking-tight mt-1">Engineering Roster</h2>
+            </div>
+            <div id="viewTeamGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+        </section>
+
+        <!-- CAREERS -->
+        <section id="careersPage" class="content-tab hidden section-enter space-y-8 py-8">
+            <div>
+                <span class="text-[11px] font-bold tracking-widest text-violet-400 uppercase">Join the Studio</span>
+                <h2 class="text-4xl font-extrabold text-white tracking-tight mt-1">Open Positions</h2>
+                <p class="text-gray-500 text-sm mt-2">Shape the future of gaming infrastructure with our engineering team.</p>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div id="jobListingsGrid" class="lg:col-span-2 space-y-6">
-                    <!-- Job listings will be rendered here -->
-                </div>
-                
-                <div class="bg-gray-950 border border-gray-800 p-6 rounded-2xl shadow-xl h-fit space-y-4">
-                    <h3 class="text-lg font-bold text-white flex items-center space-x-2">
-                        <i class="fa-solid fa-file-signature text-purple-500"></i>
-                        <span>Apply Here</span>
+                <div id="jobListingsGrid" class="lg:col-span-2 space-y-4"></div>
+
+                <div class="bg-gray-950 border border-gray-800/60 p-6 rounded-2xl h-fit space-y-4 shadow-xl">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-file-signature text-violet-400"></i>
+                        Apply
                     </h3>
                     <div class="space-y-3 text-sm">
                         <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Your Professional Name</label>
-                            <input type="text" id="appFormName" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500">
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Your Name</label>
+                            <input type="text" id="appFormName" class="w-full bg-gray-900 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Contact Email Address</label>
-                            <input type="email" id="appFormEmail" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500">
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Contact Email</label>
+                            <input type="email" id="appFormEmail" class="w-full bg-gray-900 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Select Position</label>
-                            <select id="appFormPosition" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500">
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Position</label>
+                            <select id="appFormPosition" class="w-full bg-gray-900 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition">
                                 <option value="">-- Select a position --</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-1">Link to Portfolio / Experience Notes</label>
-                            <textarea id="appFormNotes" rows="3" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500" placeholder="GitHub link, Roblox portfolio link, past creations..."></textarea>
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Portfolio / Notes</label>
+                            <textarea id="appFormNotes" rows="3" class="w-full bg-gray-900 border border-gray-700/60 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition resize-none" placeholder="GitHub, Roblox portfolio, past work..."></textarea>
                         </div>
-                        <button onclick="submitJobApplication()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 rounded-xl transition text-sm">
-                            Submit Application Record
+                        <button onclick="submitJobApplication()" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-2.5 rounded-xl transition text-sm hover:shadow-lg hover:shadow-violet-600/20">
+                            Submit Application
                         </button>
-                        <p id="appSuccessMsg" class="hidden text-xs text-center text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-lg"></p>
+                        <p id="appSuccessMsg" class="hidden text-xs text-center text-emerald-400 bg-emerald-500/8 border border-emerald-500/20 p-3 rounded-lg"></p>
                     </div>
                 </div>
             </div>
@@ -384,62 +356,32 @@
 
     </main>
 
-    <footer class="bg-gray-950 border-t border-gray-800 text-center py-6 text-xs text-gray-500">
-        <p>&copy; 2026 IRIS Interactives. Real-time architecture synchronized with system servers.</p>
+    <footer class="border-t border-gray-800/60 py-8 text-center">
+        <p class="text-xs font-mono text-gray-600">&copy; 2026 IRIS Interactives &mdash; Real-time architecture synchronized with system servers.</p>
     </footer>
 
-    <div id="loginModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-sm w-full p-6 space-y-6 shadow-2xl">
+    <!-- LOGIN MODAL -->
+    <div id="loginModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-gray-900 border border-gray-800/80 rounded-2xl max-w-sm w-full p-6 space-y-5 shadow-2xl">
             <div class="flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white">Secure Management Access</h3>
-                <button onclick="closeLoginModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Username</label>
-                    <input type="text" id="loginUser" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500 text-sm">
+                    <h3 class="text-base font-bold text-white">Secure Access</h3>
+                    <p class="text-xs text-gray-500 font-mono mt-0.5">Management authentication required</p>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Security Key</label>
-                    <input type="password" id="loginPass" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500 text-sm">
-                </div>
-                <div id="loginError" class="text-xs text-red-400 hidden bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg">System credentials invalid.</div>
-                <button onclick="attemptLogin()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">Authenticate</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Purchase Verification Modal -->
-    <div id="purchaseModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white">Verify Purchase & Generate Token</h3>
-                <button onclick="closePurchaseModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Purchase ID</label>
-                    <input type="text" id="verifyPurchaseId" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-sm" readonly>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Item</label>
-                    <input type="text" id="verifyItemName" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-sm" readonly>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Amount</label>
-                    <input type="text" id="verifyAmount" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-sm" readonly>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Delivery Token (Auto-Generated)</label>
-                    <input type="text" id="deliveryToken" class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-sm" readonly>
-                </div>
-                <button onclick="generateDeliveryToken()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-                    Generate Token & Mark Verified
+                <button onclick="closeLoginModal()" class="text-gray-600 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-800">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
+            <div class="space-y-3">
+                <input type="text" id="loginUser" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition font-mono" placeholder="Username">
+                <input type="password" id="loginPass" class="w-full bg-gray-950 border border-gray-700/60 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition font-mono" placeholder="Security key" onkeydown="if(event.key==='Enter') attemptLogin()">
+                <div id="loginError" class="hidden text-xs text-red-400 bg-red-500/8 border border-red-500/20 p-2.5 rounded-lg font-mono">Invalid credentials.</div>
+                <button onclick="attemptLogin()" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-2.5 rounded-lg text-sm transition">Authenticate</button>
+            </div>
         </div>
     </div>
 
+    <!-- FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { getDatabase, ref, onValue, update, set, push, runTransaction, remove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
@@ -447,88 +389,69 @@
         const firebaseConfig = { databaseURL: "https://sd-enforcement-default-rtdb.firebaseio.com/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        
+
         const rootRef = ref(db, 'iris_interactives');
 
         let currentUser = null;
         let allCredentials = [];
         let allJobs = [];
-        let allStoreItems = [];
-        let allSales = [];
-        let selectedPurchaseId = null;
 
         const REQUIRED_OWNER = { user: "My_AtlasX", pass: "washing0out", role: "Owner" };
         const PROD_USER = { user: "Prod_Staff", pass: "studio2026", role: "Production" };
 
-        // 1. INCREMENT REAL SITE VISITS ON REFRESH
-        const visitsRef = ref(db, 'iris_interactives/analytics/totalVisits');
-        runTransaction(visitsRef, (currentValue) => {
-            return (currentValue || 0) + 1;
-        }).catch(err => console.log("Visit logging skipped due to rules setup"));
+        // Track visits
+        runTransaction(ref(db, 'iris_interactives/analytics/totalVisits'), v => (v || 0) + 1)
+            .catch(() => {});
 
-        // 2. REAL-TIME DATA FLOW LISTENER
+        // Real-time listener
         onValue(rootRef, (snapshot) => {
             const data = snapshot.val() || {};
-            
+
             allCredentials = data.credentials ? Object.values(data.credentials) : [REQUIRED_OWNER, PROD_USER];
             allJobs = data.jobs ? Object.values(data.jobs) : [];
-            allStoreItems = data.storeItems ? Object.values(data.storeItems) : [];
-            allSales = data.sales ? Object.entries(data.sales).map(([id, sale]) => ({ ...sale, firebaseId: id })) : [];
+
+            const appCount = data.applications ? Object.keys(data.applications).length : 0;
+            const visits = data.analytics?.totalVisits || 1;
+
+            document.getElementById('analyticApps').innerText = appCount;
+            document.getElementById('analyticVisits').innerText = visits;
+            document.getElementById('analyticJobs').innerText = allJobs.length;
 
             if (data.content) {
                 renderPublicContent(data.content);
                 if (currentUser) populateEditorFields(data.content);
                 document.getElementById('initBtn').classList.add('hidden');
             } else {
-                if (currentUser && currentUser.role === 'Owner') document.getElementById('initBtn').classList.remove('hidden');
+                if (currentUser?.role === 'Owner') document.getElementById('initBtn').classList.remove('hidden');
             }
-
-            // Update analytics
-            const salesRecordCount = allSales.length;
-            let totalRevenueSum = 0;
-            let verifiedCount = 0;
-            allSales.forEach(sale => {
-                totalRevenueSum += parseFloat(sale.amountPaid || 0);
-                if (sale.verified) verifiedCount++;
-            });
-            const appRecordCount = data.applications ? Object.keys(data.applications).length : 0;
-            const liveVisitsCount = (data.analytics && data.analytics.totalVisits) ? data.analytics.totalVisits : 1;
-
-            document.getElementById('analyticRevenue').innerText = `$${totalRevenueSum.toFixed(2)}`;
-            document.getElementById('analyticSalesCount').innerText = `${salesRecordCount} purchases`;
-            document.getElementById('analyticVerified').innerText = verifiedCount;
-            document.getElementById('analyticApps').innerText = appRecordCount;
-            document.getElementById('analyticVisits').innerText = liveVisitsCount;
 
             if (currentUser) {
                 renderApplicantTable(data.applications);
-                renderPurchaseTracker();
                 renderCredentialsList();
                 renderJobListingsList();
-                renderStoreItemsList();
-                populatePositionDropdown();
             }
 
             renderJobListingsGrid();
-            renderStoreItemsGrid();
+            populatePositionDropdown();
         });
 
-        // 3. RENDER PUBLIC CONTENT
         function renderPublicContent(content) {
-            document.getElementById('viewHomeHeadline').innerText = content.homeHeadline || "No Content Maintained";
-            document.getElementById('viewHomeSubtext').innerText = content.homeSubtext || "";
-            document.getElementById('viewAboutBio').innerText = content.aboutBio || "";
+            document.getElementById('viewHomeHeadline').innerText = content.homeHeadline || '';
+            document.getElementById('viewHomeSubtext').innerText = content.homeSubtext || '';
+            document.getElementById('viewAboutBio').innerText = content.aboutBio || '';
 
-            const teamContainer = document.getElementById('viewTeamGrid');
-            teamContainer.innerHTML = '';
+            const grid = document.getElementById('viewTeamGrid');
+            grid.innerHTML = '';
             if (content.teamList) {
                 content.teamList.split(',').forEach(member => {
                     if (!member.trim()) return;
-                    teamContainer.innerHTML += `
-                        <div class="bg-gray-950 p-4 border border-gray-800 rounded-xl text-center">
-                            <div class="w-12 h-12 bg-purple-900/40 text-purple-400 rounded-full mx-auto flex items-center justify-center text-lg mb-2"><i class="fa-solid fa-user-gear"></i></div>
+                    grid.innerHTML += `
+                        <div class="bg-gray-950 p-5 border border-gray-800/60 rounded-2xl text-center card-hover">
+                            <div class="w-12 h-12 bg-violet-900/30 text-violet-400 rounded-full mx-auto flex items-center justify-center text-lg mb-3">
+                                <i class="fa-solid fa-user-gear"></i>
+                            </div>
                             <h4 class="text-sm font-bold text-white">${member.trim()}</h4>
-                            <p class="text-[11px] text-gray-500 uppercase tracking-widest mt-1">Core Developer</p>
+                            <p class="text-[11px] text-gray-600 uppercase tracking-widest mt-1 font-mono">Core Dev</p>
                         </div>`;
                 });
             }
@@ -538,60 +461,28 @@
             const grid = document.getElementById('jobListingsGrid');
             grid.innerHTML = '';
             if (allJobs.length === 0) {
-                grid.innerHTML = '<p class="text-gray-400 col-span-full">No job listings currently available.</p>';
+                grid.innerHTML = '<p class="text-gray-600 font-mono text-sm">No listings currently available.</p>';
                 return;
             }
             allJobs.forEach(job => {
                 grid.innerHTML += `
-                    <div class="bg-gray-950 border border-gray-800 p-6 rounded-2xl space-y-4">
-                        <h3 class="text-xl font-bold text-purple-400">${job.title}</h3>
-                        <div class="flex items-center space-x-2 text-xs bg-gray-900 text-gray-300 px-3 py-1.5 rounded-lg border border-gray-800 w-fit">
-                            <i class="fa-solid fa-wallet text-emerald-400"></i>
-                            <strong class="text-white">${job.pay}</strong>
+                    <div class="bg-gray-950 border border-gray-800/60 p-6 rounded-2xl card-hover space-y-3">
+                        <h3 class="text-lg font-bold text-white">${job.title}</h3>
+                        <div class="inline-flex items-center gap-1.5 text-xs bg-emerald-500/8 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg font-mono">
+                            <i class="fa-solid fa-wallet text-emerald-400 text-[10px]"></i>
+                            ${job.pay}
                         </div>
-                        <p class="text-sm text-gray-400 leading-relaxed">${job.description}</p>
-                    </div>`;
-            });
-        }
-
-        function renderStoreItemsGrid() {
-            const grid = document.getElementById('storeItemsGrid');
-            grid.innerHTML = '';
-            if (allStoreItems.length === 0) {
-                grid.innerHTML = '<p class="text-gray-400 col-span-full">No items currently in store.</p>';
-                return;
-            }
-            allStoreItems.forEach(item => {
-                grid.innerHTML += `
-                    <div class="max-w-md bg-gray-950 rounded-2xl border border-gray-800 overflow-hidden shadow-lg">
-                        <div class="h-44 bg-gradient-to-br from-purple-900 to-indigo-950 flex flex-col items-center justify-center space-y-3 relative">
-                            <i class="fa-solid fa-box-open text-4xl text-purple-400"></i>
-                            ${item.showcase ? `<a href="${item.showcase}" target="_blank" class="text-xs bg-gray-900/80 text-purple-300 hover:text-white px-3 py-1 rounded-full border border-purple-500/30 transition">
-                                <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> View Showcase
-                            </a>` : ''}
-                        </div>
-                        <div class="p-6 space-y-4">
-                            <div class="flex justify-between items-start">
-                                <h3 class="text-xl font-bold text-white">${item.name}</h3>
-                                <span class="bg-emerald-500/10 text-emerald-400 font-mono text-sm px-2.5 py-1 rounded-md border border-emerald-500/20">$${parseFloat(item.price).toFixed(2)}</span>
-                            </div>
-                            <p class="text-sm text-gray-400">${item.description}</p>
-                            <button onclick="triggerSimulatedPurchase('${item.id}', '${item.name}', ${item.price}, '${item.file}')" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 rounded-xl transition text-sm">
-                                <i class="fa-solid fa-cart-shopping mr-1"></i> Order and Generate Delivery File
-                            </button>
-                        </div>
+                        <p class="text-sm text-gray-500 leading-relaxed">${job.description}</p>
                     </div>`;
             });
         }
 
         function populatePositionDropdown() {
             const select = document.getElementById('appFormPosition');
-            const currentValue = select.value;
+            const val = select.value;
             select.innerHTML = '<option value="">-- Select a position --</option>';
-            allJobs.forEach(job => {
-                select.innerHTML += `<option value="${job.title}">${job.title}</option>`;
-            });
-            if (currentValue) select.value = currentValue;
+            allJobs.forEach(j => select.innerHTML += `<option value="${j.title}">${j.title}</option>`);
+            if (val) select.value = val;
         }
 
         function populateEditorFields(content) {
@@ -601,431 +492,228 @@
             document.getElementById('editTeamList').value = content.teamList || '';
         }
 
-        // 4. PURCHASE TRACKER RENDERING
-        function renderPurchaseTracker() {
-            const tbody = document.getElementById('purchaseTrackerBody');
+        function renderApplicantTable(applications) {
+            const tbody = document.getElementById('trackerTableBody');
             tbody.innerHTML = '';
-
-            if (allSales.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">No purchases registered yet.</td></tr>`;
+            if (!applications) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-gray-600 font-mono text-xs">No applications on record.</td></tr>`;
                 return;
             }
-
-            allSales.forEach(sale => {
-                const statusColor = sale.verified ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-                const statusText = sale.verified ? 'Verified & Delivered' : 'Pending Verification';
-                
+            Object.entries(applications).forEach(([fId, app]) => {
+                const badgeClass = app.status === 'Accepted' ? 'badge-accepted' : app.status === 'Rejected' ? 'badge-rejected' : 'badge-pending';
                 tbody.innerHTML += `
-                    <tr class="hover:bg-gray-900/50 transition">
-                        <td class="p-3 font-mono text-xs text-gray-400">${sale.saleId}</td>
-                        <td class="p-3 text-white">${sale.itemPurchased}</td>
-                        <td class="p-3 text-emerald-400 font-bold">$${parseFloat(sale.amountPaid).toFixed(2)}</td>
-                        <td class="p-3 text-gray-400 text-xs">${sale.timestamp}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] font-medium border ${statusColor}">${statusText}</span></td>
-                        <td class="p-3 text-right">
-                            ${!sale.verified ? `<button onclick="openVerifyModal('${sale.firebaseId}', '${sale.saleId}', '${sale.itemPurchased}', ${sale.amountPaid})" class="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded hover:bg-emerald-600/40 transition">Verify Purchase</button>` : '<span class="text-xs text-emerald-400">✓ Done</span>'}
+                    <tr class="hover:bg-gray-900/30 transition">
+                        <td class="px-4 py-3 font-semibold text-white text-sm">${app.applicantName}</td>
+                        <td class="px-4 py-3 text-violet-400 text-xs font-mono">${app.position}</td>
+                        <td class="px-4 py-3 text-gray-500 text-xs font-mono">${app.applicantEmail}</td>
+                        <td class="px-4 py-3 text-gray-500 text-xs max-w-xs truncate" title="${app.portfolioNotes}">${app.portfolioNotes}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-0.5 rounded border text-[11px] font-bold ${badgeClass}">${app.status}</span>
+                        </td>
+                        <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+                            <button onclick="updateAppStatus('${fId}', 'Accepted')" class="text-xs bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded hover:bg-emerald-600/20 transition">Accept</button>
+                            <button onclick="updateAppStatus('${fId}', 'Rejected')" class="text-xs bg-red-600/10 text-red-400 border border-red-500/20 px-2 py-1 rounded hover:bg-red-600/20 transition">Reject</button>
+                            <button onclick="deleteAppRecord('${fId}')" class="text-gray-600 hover:text-red-400 px-1 transition text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
         }
 
-        window.openVerifyModal = function(firebaseId, saleId, itemName, amount) {
-            selectedPurchaseId = firebaseId;
-            document.getElementById('verifyPurchaseId').value = saleId;
-            document.getElementById('verifyItemName').value = itemName;
-            document.getElementById('verifyAmount').value = `$${parseFloat(amount).toFixed(2)}`;
-            document.getElementById('deliveryToken').value = '';
-            document.getElementById('purchaseModal').classList.replace('hidden', 'flex');
-        }
-
-        window.closePurchaseModal = function() {
-            document.getElementById('purchaseModal').classList.replace('flex', 'hidden');
-            selectedPurchaseId = null;
-        }
-
-        window.generateDeliveryToken = function() {
-            if (!selectedPurchaseId) return;
-            const token = 'DELIVERY-' + Math.random().toString(36).substring(2, 15).toUpperCase() + '-' + Date.now();
-            document.getElementById('deliveryToken').value = token;
-
-            const saleRef = ref(db, `iris_interactives/sales/${selectedPurchaseId}`);
-            update(saleRef, {
-                verified: true,
-                deliveryToken: token,
-                verifiedAt: new Date().toLocaleString()
-            }).then(() => {
-                alert('Purchase verified! Token generated and sent to customer.');
-                closePurchaseModal();
-            }).catch(err => alert("Error: " + err.message));
-        }
-
-        // 5. CREDENTIALS MANAGEMENT
         function renderCredentialsList() {
             const list = document.getElementById('credentialsList');
             list.innerHTML = '';
             if (allCredentials.length === 0) {
-                list.innerHTML = '<p class="text-gray-500 text-xs">No credentials registered.</p>';
+                list.innerHTML = '<p class="text-gray-600 text-xs font-mono">No credentials registered.</p>';
                 return;
             }
-            allCredentials.forEach((cred, idx) => {
+            allCredentials.forEach(cred => {
                 list.innerHTML += `
-                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 text-xs flex justify-between items-center">
+                    <div class="bg-gray-800/60 px-3 py-2.5 rounded-lg border border-gray-700/40 text-xs flex justify-between items-center">
                         <div>
-                            <p class="text-white font-mono">${cred.user}</p>
-                            <p class="text-gray-400 text-[11px]">Role: ${cred.role}</p>
+                            <p class="text-white font-mono font-semibold">${cred.user}</p>
+                            <p class="text-gray-500 text-[11px] mt-0.5">${cred.role}</p>
                         </div>
-                        ${cred.user !== 'My_AtlasX' ? `<button onclick="deleteCredential('${cred.user}')" class="text-red-400 hover:text-red-300 transition">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>` : '<span class="text-amber-500 text-[11px]">Owner</span>'}
+                        ${cred.user !== 'My_AtlasX'
+                            ? `<button onclick="deleteCredential('${cred.user}')" class="text-gray-600 hover:text-red-400 transition"><i class="fa-solid fa-trash text-xs"></i></button>`
+                            : `<span class="text-amber-500 text-[11px] font-bold">Owner</span>`}
                     </div>`;
             });
         }
+
+        function renderJobListingsList() {
+            const list = document.getElementById('jobListingsList');
+            list.innerHTML = '';
+            if (allJobs.length === 0) {
+                list.innerHTML = '<p class="text-gray-600 text-xs font-mono">No listings yet.</p>';
+                return;
+            }
+            allJobs.forEach(job => {
+                list.innerHTML += `
+                    <div class="bg-gray-800/60 px-3 py-2.5 rounded-lg border border-gray-700/40 text-xs flex justify-between items-start gap-2">
+                        <div class="min-w-0">
+                            <p class="text-white font-semibold truncate">${job.title}</p>
+                            <p class="text-emerald-400 text-[11px] font-mono mt-0.5">${job.pay}</p>
+                        </div>
+                        <button onclick="deleteJob('${job.id}')" class="text-gray-600 hover:text-red-400 transition flex-shrink-0 mt-0.5"><i class="fa-solid fa-trash text-xs"></i></button>
+                    </div>`;
+            });
+        }
+
+        // Exposed functions
+        window.updateAppStatus = function(id, status) {
+            if (currentUser?.role !== 'Owner') return alert("Owner access required.");
+            update(ref(db, `iris_interactives/applications/${id}`), { status });
+        };
+
+        window.deleteAppRecord = function(id) {
+            if (currentUser?.role !== 'Owner') return alert("Owner access required.");
+            if (confirm("Permanently remove this application record?"))
+                remove(ref(db, `iris_interactives/applications/${id}`));
+        };
 
         window.addNewCredential = function() {
             const user = document.getElementById('newCredUsername').value.trim();
             const pass = document.getElementById('newCredPassword').value.trim();
             const role = document.getElementById('newCredRole').value;
-
-            if (!user || !pass) {
-                alert("Please fill in username and security key.");
-                return;
-            }
-
-            if (allCredentials.some(c => c.user === user)) {
-                alert("Username already exists.");
-                return;
-            }
-
-            const credRef = ref(db, `iris_interactives/credentials/${user}`);
-            set(credRef, { user, pass, role }).then(() => {
+            if (!user || !pass) return alert("Fill in username and security key.");
+            if (allCredentials.some(c => c.user === user)) return alert("Username already exists.");
+            set(ref(db, `iris_interactives/credentials/${user}`), { user, pass, role }).then(() => {
                 document.getElementById('newCredUsername').value = '';
                 document.getElementById('newCredPassword').value = '';
-                alert("Credential added successfully!");
-            }).catch(err => alert("Error: " + err.message));
-        }
+            }).catch(err => alert(err.message));
+        };
 
         window.deleteCredential = function(username) {
-            if (confirm(`Delete credential for ${username}?`)) {
-                const credRef = ref(db, `iris_interactives/credentials/${username}`);
-                remove(credRef).catch(err => alert("Error: " + err.message));
-            }
-        }
-
-        // 6. JOB LISTINGS MANAGEMENT
-        function renderJobListingsList() {
-            const list = document.getElementById('jobListingsList');
-            list.innerHTML = '';
-            if (allJobs.length === 0) {
-                list.innerHTML = '<p class="text-gray-500 text-xs">No job listings created yet.</p>';
-                return;
-            }
-            allJobs.forEach(job => {
-                list.innerHTML += `
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 text-xs space-y-2">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-white font-semibold">${job.title}</p>
-                                <p class="text-gray-400 text-[11px] line-clamp-2">${job.description}</p>
-                                <p class="text-purple-300 text-[11px] mt-1"><strong>Pay:</strong> ${job.pay}</p>
-                            </div>
-                            <button onclick="deleteJob('${job.id}')" class="text-red-400 hover:text-red-300 transition flex-shrink-0">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>`;
-            });
-        }
+            if (confirm(`Delete credential for ${username}?`))
+                remove(ref(db, `iris_interactives/credentials/${username}`)).catch(err => alert(err.message));
+        };
 
         window.addNewJob = function() {
             const title = document.getElementById('newJobTitle').value.trim();
             const desc = document.getElementById('newJobDesc').value.trim();
             const pay = document.getElementById('newJobPay').value.trim();
-
-            if (!title || !desc || !pay) {
-                alert("Please fill in all job fields.");
-                return;
-            }
-
-            const jobRef = ref(db, 'iris_interactives/jobs');
-            const newJobRef = push(jobRef);
-            set(newJobRef, {
-                id: newJobRef.key,
-                title,
-                description: desc,
-                pay,
-                timestamp: new Date().toLocaleString()
-            }).then(() => {
+            if (!title || !desc || !pay) return alert("Fill in all job fields.");
+            const newRef = push(ref(db, 'iris_interactives/jobs'));
+            set(newRef, { id: newRef.key, title, description: desc, pay, timestamp: new Date().toLocaleString() }).then(() => {
                 document.getElementById('newJobTitle').value = '';
                 document.getElementById('newJobDesc').value = '';
                 document.getElementById('newJobPay').value = '';
-                alert("Job listing added successfully!");
-            }).catch(err => alert("Error: " + err.message));
-        }
+            }).catch(err => alert(err.message));
+        };
 
         window.deleteJob = function(jobId) {
-            if (confirm("Delete this job listing?")) {
-                const jobRef = ref(db, `iris_interactives/jobs/${jobId}`);
-                remove(jobRef).catch(err => alert("Error: " + err.message));
-            }
-        }
+            if (confirm("Delete this listing?"))
+                remove(ref(db, `iris_interactives/jobs/${jobId}`)).catch(err => alert(err.message));
+        };
 
-        // 7. STORE ITEMS MANAGEMENT
-        function renderStoreItemsList() {
-            const list = document.getElementById('storeItemsList');
-            list.innerHTML = '';
-            if (allStoreItems.length === 0) {
-                list.innerHTML = '<p class="text-gray-500 text-xs">No store items created yet.</p>';
-                return;
-            }
-            allStoreItems.forEach(item => {
-                list.innerHTML += `
-                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 text-xs space-y-2">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-white font-semibold">${item.name}</p>
-                                <p class="text-gray-400 text-[11px] line-clamp-2">${item.description}</p>
-                                <p class="text-emerald-300 text-[11px] mt-1"><strong>$${parseFloat(item.price).toFixed(2)}</strong></p>
-                            </div>
-                            <button onclick="deleteStoreItem('${item.id}')" class="text-red-400 hover:text-red-300 transition flex-shrink-0">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        window.addNewStoreItem = function() {
-            const name = document.getElementById('newStoreItem').value.trim();
-            const desc = document.getElementById('newStoreDesc').value.trim();
-            const price = document.getElementById('newStorePrice').value.trim();
-            const showcase = document.getElementById('newStoreShowcase').value.trim();
-            const file = document.getElementById('newStoreFile').value.trim();
-
-            if (!name || !desc || !price || !file) {
-                alert("Please fill in all required store item fields.");
-                return;
-            }
-
-            const itemRef = ref(db, 'iris_interactives/storeItems');
-            const newItemRef = push(itemRef);
-            set(newItemRef, {
-                id: newItemRef.key,
-                name,
-                description: desc,
-                price: parseFloat(price),
-                showcase: showcase || '',
-                file,
-                timestamp: new Date().toLocaleString()
-            }).then(() => {
-                document.getElementById('newStoreItem').value = '';
-                document.getElementById('newStoreDesc').value = '';
-                document.getElementById('newStorePrice').value = '';
-                document.getElementById('newStoreShowcase').value = '';
-                document.getElementById('newStoreFile').value = '';
-                alert("Store item added successfully!");
-            }).catch(err => alert("Error: " + err.message));
-        }
-
-        window.deleteStoreItem = function(itemId) {
-            if (confirm("Delete this store item?")) {
-                const itemRef = ref(db, `iris_interactives/storeItems/${itemId}`);
-                remove(itemRef).catch(err => alert("Error: " + err.message));
-            }
-        }
-
-        // 8. JOB APPLICATION SUBMISSION
         window.submitJobApplication = function() {
             const name = document.getElementById('appFormName').value.trim();
             const email = document.getElementById('appFormEmail').value.trim();
-            const position = document.getElementById('appFormPosition').value.trim();
+            const position = document.getElementById('appFormPosition').value;
             const notes = document.getElementById('appFormNotes').value.trim();
-
-            if(!name || !email || !position || !notes) {
-                alert("Please fill out all application fields before transmitting data.");
-                return;
-            }
-
-            const applicationGroupRef = ref(db, 'iris_interactives/applications');
-            const newAppRef = push(applicationGroupRef);
-            
-            set(newAppRef, {
-                id: newAppRef.key,
-                applicantName: name,
-                applicantEmail: email,
-                portfolioNotes: notes,
-                position: position,
-                status: "Pending Review",
+            if (!name || !email || !position || !notes) return alert("Please fill out all fields.");
+            const newRef = push(ref(db, 'iris_interactives/applications'));
+            set(newRef, {
+                id: newRef.key, applicantName: name, applicantEmail: email,
+                portfolioNotes: notes, position, status: "Pending Review",
                 timestamp: new Date().toLocaleString()
             }).then(() => {
-                const confirmation = document.getElementById('appSuccessMsg');
-                confirmation.innerText = "🚀 Application submitted successfully to the Management Board Tracker!";
-                confirmation.classList.remove('hidden');
-                document.getElementById('appFormName').value = '';
-                document.getElementById('appFormEmail').value = '';
+                const msg = document.getElementById('appSuccessMsg');
+                msg.innerText = "Application submitted to Management Board!";
+                msg.classList.remove('hidden');
+                ['appFormName','appFormEmail','appFormNotes'].forEach(id => document.getElementById(id).value = '');
                 document.getElementById('appFormPosition').value = '';
-                document.getElementById('appFormNotes').value = '';
-                setTimeout(() => confirmation.classList.add('hidden'), 6000);
-            }).catch(err => alert("Error writing application to database: " + err.message));
-        }
+                setTimeout(() => msg.classList.add('hidden'), 6000);
+            }).catch(err => alert(err.message));
+        };
 
-        // 9. PURCHASE SIMULATION
-        window.triggerSimulatedPurchase = function(itemId, itemName, price, file) {
-            const salesGroupRef = ref(db, 'iris_interactives/sales');
-            const newSaleRef = push(salesGroupRef);
-
-            set(newSaleRef, {
-                saleId: newSaleRef.key,
-                itemPurchased: itemName,
-                amountPaid: price,
-                itemId: itemId,
-                file: file,
-                verified: false,
-                timestamp: new Date().toLocaleString()
-            }).then(() => {
-                alert(`Transaction logged! Asset: ${file}\nYour purchase will appear in the admin dashboard for verification.`);
-            }).catch(err => alert("Sales database logging failed: " + err.message));
-        }
-
-        // 10. APPLICATION TRACKER RENDERING
-        function renderApplicantTable(applications) {
-            const tbody = document.getElementById('trackerTableBody');
-            tbody.innerHTML = '';
-
-            if(!applications) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">No applications registered inside Firebase records yet.</td></tr>`;
-                return;
-            }
-
-            Object.entries(applications).forEach(([firebaseId, app]) => {
-                const badgeColor = app.status === 'Accepted' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 
-                                   app.status === 'Rejected' ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-                
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-900/50 transition">
-                        <td class="p-3 font-semibold text-white">${app.applicantName}</td>
-                        <td class="p-3 text-purple-400 text-xs">${app.position}</td>
-                        <td class="p-3 text-gray-400 text-xs font-mono">${app.applicantEmail}</td>
-                        <td class="p-3 text-gray-400 text-xs max-w-xs truncate" title="${app.portfolioNotes}">${app.portfolioNotes}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] font-medium border ${badgeColor}">${app.status}</span></td>
-                        <td class="p-3 text-right space-x-1 whitespace-nowrap">
-                            <button onclick="updateAppStatus('${firebaseId}', 'Accepted')" class="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded hover:bg-emerald-600/40 transition">Accept</button>
-                            <button onclick="updateAppStatus('${firebaseId}', 'Rejected')" class="text-xs bg-red-600/20 text-red-400 border border-red-500/30 px-2 py-1 rounded hover:bg-red-600/40 transition">Reject</button>
-                            <button onclick="deleteAppRecord('${firebaseId}')" class="text-xs text-gray-500 hover:text-white px-1 transition" title="Delete Permanent Log"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-            });
-        }
-
-        window.updateAppStatus = function(id, newStatus) {
-            if(currentUser.role !== 'Owner') return alert("Access Restriction Alert: Only Owners can modify Applicant hiring statuses.");
-            const targetAppRef = ref(db, `iris_interactives/applications/${id}`);
-            update(targetAppRef, { status: newStatus });
-        }
-
-        window.deleteAppRecord = function(id) {
-            if(currentUser.role !== 'Owner') return alert("Access Restriction Alert: Only Owners can purge data records.");
-            if(confirm("Confirm permanent removal of applicant records from Firebase?")) {
-                const targetAppRef = ref(db, `iris_interactives/applications/${id}`);
-                remove(targetAppRef);
-            }
-        }
-
-        // 11. LOGIN SECURITY CONTROL LOGIC
         window.attemptLogin = function() {
-            const userIn = document.getElementById('loginUser').value;
-            const passIn = document.getElementById('loginPass').value;
-            const errorDiv = document.getElementById('loginError');
-
-            const foundCred = allCredentials.find(c => c.user === userIn && c.pass === passIn);
-            
-            if (foundCred) {
-                currentUser = foundCred;
-            } else {
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-
-            errorDiv.classList.add('hidden');
+            const user = document.getElementById('loginUser').value;
+            const pass = document.getElementById('loginPass').value;
+            const err = document.getElementById('loginError');
+            const found = allCredentials.find(c => c.user === user && c.pass === pass);
+            if (!found) { err.classList.remove('hidden'); return; }
+            err.classList.add('hidden');
+            currentUser = found;
             closeLoginModal();
             applyUserSessionUI();
-        }
+        };
 
         function applyUserSessionUI() {
-            if (!currentUser) return;
             document.getElementById('loginNavBtn').classList.add('hidden');
             const badge = document.getElementById('userBadge');
-            const badgeText = document.getElementById('badgeText');
             badge.classList.remove('hidden');
-            badgeText.innerText = `${currentUser.user} (${currentUser.role})`;
+            badge.classList.add('flex');
+            document.getElementById('badgeText').innerText = `${currentUser.user} · ${currentUser.role}`;
             document.getElementById('dashboardSection').classList.remove('hidden');
 
             if (currentUser.role === 'Owner') {
                 document.getElementById('credentialsSection').classList.remove('hidden');
-                document.getElementById('purchaseTrackerSection').classList.remove('hidden');
-            } else {
-                document.getElementById('credentialsSection').classList.add('hidden');
-                document.getElementById('purchaseTrackerSection').classList.add('hidden');
+                document.getElementById('ownerCmsGroup').classList.remove('hidden');
             }
 
-            renderJobListingsList();
-            renderStoreItemsList();
-            populatePositionDropdown();
+            // Re-render with user context
+            onValue(rootRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                renderApplicantTable(data.applications);
+                if (data.content) populateEditorFields(data.content);
+            }, { onlyOnce: true });
         }
 
         window.saveCmsData = function() {
-            if (!currentUser) return alert("Session execution timeout error.");
-            let updatedPayload = {};
-            
-            if (currentUser.role === 'Owner') {
-                updatedPayload = {
-                    "content/homeHeadline": document.getElementById('editHomeHeadline').value,
-                    "content/homeSubtext": document.getElementById('editHomeSubtext').value,
-                    "content/aboutBio": document.getElementById('editAboutBio').value,
-                    "content/teamList": document.getElementById('editTeamList').value
-                };
-            }
-
-            update(rootRef, updatedPayload)
-                .then(() => alert("Firebase Sync Successful! Updates are now live."))
-                .catch(err => alert("Write rejected: " + err.message));
-        }
+            if (!currentUser || currentUser.role !== 'Owner') return alert("Owner access required.");
+            update(rootRef, {
+                "content/homeHeadline": document.getElementById('editHomeHeadline').value,
+                "content/homeSubtext": document.getElementById('editHomeSubtext').value,
+                "content/aboutBio": document.getElementById('editAboutBio').value,
+                "content/teamList": document.getElementById('editTeamList').value,
+            }).then(() => alert("Changes saved and live!")).catch(err => alert(err.message));
+        };
 
         window.initializeDatabase = function() {
-            if (!currentUser || currentUser.role !== 'Owner') return;
-            const seed = {
+            if (currentUser?.role !== 'Owner') return;
+            set(rootRef, {
                 content: {
                     homeHeadline: "Next-Gen Architecture for High-Scale Gaming Studios",
-                    homeSubtext: "We specialize in engineered solutions extending across Roblox LuaU systems infrastructure, standalone Minecraft plugins, and secure database connected web apps.",
+                    homeSubtext: "We specialize in engineered solutions spanning Roblox LuaU systems infrastructure, standalone Minecraft plugins, and secure database-connected web apps.",
                     aboutBio: "IRIS Interactives was created to bridge high-concurrency database networking directly with modular asset design patterns.",
                     teamList: "My_AtlasX, Dev_Alpha, Engine_Lead"
                 }
-            };
-            set(rootRef, seed).then(() => alert("Structural Data Seeded Successfully!"));
-        }
+            }).then(() => alert("Demo data seeded!"));
+        };
 
         window.logout = function() {
             currentUser = null;
             document.getElementById('loginNavBtn').classList.remove('hidden');
-            document.getElementById('userBadge').classList.add('hidden');
+            const badge = document.getElementById('userBadge');
+            badge.classList.add('hidden');
+            badge.classList.remove('flex');
             document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('credentialsSection').classList.add('hidden');
+            document.getElementById('ownerCmsGroup').classList.add('hidden');
             document.getElementById('loginUser').value = '';
             document.getElementById('loginPass').value = '';
-        }
+        };
     </script>
 
     <script>
+        const TABS = ['home', 'about', 'team', 'careers'];
+
         function switchTab(tabId) {
-            document.querySelectorAll('.content-tab').forEach(section => section.classList.add('hidden'));
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('text-purple-400');
-                link.classList.add('text-gray-400');
+            TABS.forEach(id => {
+                const page = document.getElementById(id + 'Page');
+                const link = document.querySelector(`button[onclick="switchTab('${id}')"]`);
+                page.classList.add('hidden');
+                if (link) { link.classList.remove('active'); link.classList.add('text-gray-400'); link.classList.remove('text-gray-300'); }
             });
-            document.getElementById(tabId + 'Page').classList.remove('hidden');
-            if(event && event.target && event.target.classList.contains('nav-link')) {
-                event.target.classList.remove('text-gray-400');
-                event.target.classList.add('text-purple-400');
-            }
+            const target = document.getElementById(tabId + 'Page');
+            target.classList.remove('hidden');
+            target.classList.add('section-enter');
+            setTimeout(() => target.classList.remove('section-enter'), 400);
+            const activeLink = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
+            if (activeLink) { activeLink.classList.add('active'); activeLink.classList.remove('text-gray-400'); activeLink.classList.add('text-gray-300'); }
         }
+
         function openLoginModal() { document.getElementById('loginModal').classList.replace('hidden', 'flex'); }
         function closeLoginModal() { document.getElementById('loginModal').classList.replace('flex', 'hidden'); }
     </script>
